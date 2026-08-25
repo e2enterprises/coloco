@@ -1,16 +1,10 @@
 defmodule Coloco.Macros do
-  defmacro scope_css({:sigil_H, _context, [{_, meta, [styles]}, _mod]}) do
-    styles =
-      styles
-      |> String.trim()
-      |> validate_surrounding_tags("style", "CSS", "scope_css")
-      |> String.trim_leading("<style>")
-      |> String.trim_trailing("</style>")
-      |> String.trim()
+  defmacro scope_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
+    css = remove_surrounding_tags(css, "style", "CSS", "scope_css")
 
     # Formatting of `expr` is aligned precisely to match whitespace
     # when styles are defined normally within a HEEx sigil:
-    expr = "<style :type={ScopedCSS}>  #{styles}
+    expr = "<style :type={Coloco.ScopedCSS}>  #{css}
             </style>
             "
 
@@ -29,38 +23,25 @@ defmodule Coloco.Macros do
     end
   end
 
-  defmacro colocate_js({:sigil_H, _context, [{_, meta, [script]}, _mod]}) do
-    script =
-      script
-      |> String.trim()
-      |> validate_surrounding_tags("script", "JS", "colocate_js")
-      |> String.trim_leading("<script>")
-      |> String.trim_trailing("</script>")
-      |> String.trim()
+  defmacro colocate_js({:sigil_H, _, [{_, meta, [js]}, _]}) do
+    js = remove_surrounding_tags(js, "script", "JS", "colocate_js")
 
     # Formatting of `expr` is aligned precisely to match whitespace
     # when scripts are defined normally within a HEEx sigil:
-    expr = "<script :type={ColocatedJS}>  #{script}
+    expr = "<script :type={Phoenix.LiveView.ColocatedJS}>  #{js}
            </script>
            "
 
     compile_heex(expr, meta, __CALLER__)
   end
 
-  defmacro colocate_hook({:sigil_H, _context, [{_, meta, [script]}, _mod]}) do
+  defmacro colocate_hook({:sigil_H, _, [{_, meta, [js]}, _]}) do
     name = "hook-#{hash("#{__CALLER__.module}-#{__CALLER__.line}")}"
-
-    script =
-      script
-      |> String.trim()
-      |> validate_surrounding_tags("script", "JS", "colocate_hook")
-      |> String.trim_leading("<script>")
-      |> String.trim_trailing("</script>")
-      |> String.trim()
+    js = remove_surrounding_tags(js, "script", "JS", "colocate_hook")
 
     # Formatting of `expr` is aligned precisely to match whitespace
     # when scripts are defined normally within a HEEx sigil:
-    expr = "<script :type={ColocatedHook} name=\".#{name}\">  #{script}
+    expr = "<script :type={Phoenix.LiveView.ColocatedHook} name=\".#{name}\">  #{js}
            </script>
            "
 
@@ -71,19 +52,42 @@ defmodule Coloco.Macros do
     end
   end
 
-  defp validate_surrounding_tags("" <> str, "" <> expected_tag_name, "" <> type, "" <> macro) do
-    if (String.starts_with?(str, "<#{expected_tag_name}>") and
-          String.ends_with?(str, "</#{expected_tag_name}>")) or
-         not String.starts_with?(str, "<") do
-      str
-    else
-      raise(
-        ArgumentError,
-        "Colocated #{type} passed to #{macro} should be surrounded in" <>
-          " <#{expected_tag_name}>...</#{expected_tag_name}> tags (with no attrs)" <>
-          " to ensure code formatting works."
-      )
+  defp remove_surrounding_tags(
+         "" <> code,
+         "" <> expected_tag_name,
+         "" <> type,
+         "" <> macro
+       ) do
+    code = String.trim(code)
+
+    if String.starts_with?(code, "<") do
+      if String.starts_with?(code, "<#{expected_tag_name} ") or
+           String.starts_with?(code, "<#{expected_tag_name}\n") do
+        raise(
+          ArgumentError,
+          "Colocated #{type} code snippet passed to #{macro} is surrounded by a" <>
+            " <#{expected_tag_name}> tag with attributes that should be removed." <>
+            " Only use bare tags with #{macro}. Code snippet starts with:\n" <>
+            "#{code |> String.split("\n") |> Enum.at(0)}"
+        )
+      end
+
+      if not (String.starts_with?(code, "<#{expected_tag_name}>") and
+                String.ends_with?(code, "</#{expected_tag_name}>")) do
+        raise(
+          ArgumentError,
+          "Colocated #{type} code snippet passed to #{macro} must be surrounded" <>
+            " by <#{expected_tag_name}>...</#{expected_tag_name}> tags," <>
+            " or tags may be omitted entirely. Code snippet starts with:\n" <>
+            "#{code |> String.split("\n") |> Enum.at(0)}"
+        )
+      end
     end
+
+    code
+    |> String.trim_leading("<#{expected_tag_name}>")
+    |> String.trim_trailing("</#{expected_tag_name}>")
+    |> String.trim()
   end
 
   defp compile_heex(expr, meta, caller) do
