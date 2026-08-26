@@ -1,5 +1,3 @@
-# Scoped-Colocated-CSS implementation that works with Temple, adapted from:
-# phoenix-live-view.hexdocs.pm/Phoenix.LiveView.ColocatedCSS.html#module-scoped-css
 defmodule Coloco.ScopedCSS do
   use Phoenix.LiveView.ColocatedCSS
 
