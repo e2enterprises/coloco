@@ -36,19 +36,22 @@ defmodule Coloco.Macros do
   end
 
   defmacro colocate_hook({:sigil_H, _, [{_, meta, [js]}, _]}) do
-    name = "hook-#{hash("#{__CALLER__.module}-#{__CALLER__.line}")}"
+    name = ".hook-#{hash("#{__CALLER__.module}-#{__CALLER__.line}")}"
+    module = __CALLER__.module |> to_string() |> String.replace_prefix("Elixir.", "")
+    name_prefixed_with_module = module <> name
+
     js = remove_surrounding_tags(js, "script", "JS", "colocate_hook")
 
     # Formatting of `expr` is aligned precisely to match whitespace
     # when scripts are defined normally within a HEEx sigil:
-    expr = "<script :type={Phoenix.LiveView.ColocatedHook} name=\".#{name}\">  #{js}
+    expr = "<script :type={Phoenix.LiveView.ColocatedHook} name=\"#{name}\">  #{js}
            </script>
            "
 
     compile_heex(expr, meta, __CALLER__)
 
     quote do
-      "#{__MODULE__ |> to_string() |> String.replace_prefix("Elixir.", "")}.#{unquote(name)}"
+      unquote(name_prefixed_with_module)
     end
   end
 
