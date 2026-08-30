@@ -31,17 +31,18 @@ Coloco aims to provide an excellent dev experience in these areas:
   some transformation of CSS between source code and what is shipped to the browser.
   [Autoprefixer](https://github.com/postcss/autoprefixer) is ubiquitous for auto-adding
   variations of rules for browser compatibility reasons. Another good example is CSS
-  nesting, which is not yet supported in older browsers. PostCSS provides plugin-based
-  handling of these transforms and many others from a rich ecosystem, but it has rough
-  edges when integrated with Phoenix. Coloco makes PostCSS configuration relatively
-  simple, and handles issues like the PostCSS watcher process not terminating during
-  Phoenix server shutdown when it's installed normally
-  ([see this issue](https://elixirforum.com/t/extra-watcher-doesnt-get-killed-when-shutting-down-phoenix/2807)).
+  nesting, which is not yet supported in older browsers. [PostCSS](https://postcss.org/)
+  provides plugin-based handling of these transforms and many others from a rich
+  ecosystem, but it has rough edges when integrated with Phoenix. Coloco makes PostCSS
+  setup easy, and out-of-the-box handles bugbears like PostCSS watcher process shutdown
+  (when installed naively, orphaned processes will outlive the Phoenix server and
+  accumulate;
+  [see this issue](https://elixirforum.com/t/extra-watcher-doesnt-get-killed-when-shutting-down-phoenix/2807)).
 - **Colocated Code Formatting:** Setting up automatic formatting of colocated code
   is possible in LiveView 1.2, which is amazing, but much of the actual implementation
-  is left to user-side plugin code making the setup cumbersome. Coloco provides
+  is left to user-side plugin code making initial setup cumbersome. Coloco provides
   pre-built plugins which use Prettier to format colocated JS and CSS, with only a few
-  changes to `.formatter.exs` required.
+  easy changes to `.formatter.exs` required.
 
 ## Installation
 
