@@ -71,6 +71,13 @@ defmodule Coloco.PostCSS do
     executable = postcss_install_path |> Path.join("node_modules/.bin/postcss")
     config = postcss_install_path |> Path.join("postcss.config.cjs")
 
+    wrapper = :code.priv_dir(:coloco) |> Path.join("postcss_termination_wrapper")
+    # Use "termination wrapper" script to invoke PostCSS so that it can be shut down
+    # automatically when the Phoenix server terminates. See Port docs for details:
+    # https://elixir.hexdocs.pm/Port.html#module-orphan-operating-system-processes
+    # Further reading:
+    # elixirforum.com/t/extra-watcher-doesnt-get-killed-when-shutting-down-phoenix/2807
+
     input_css = "assets/css/app.css"
     output_css = "priv/static/assets/css/app.css"
 
@@ -78,14 +85,12 @@ defmodule Coloco.PostCSS do
 
     {output, exit_code} =
       System.cmd(
-        "node",
-        [
-          executable
-          | case watch do
-              true -> ["--watch" | args]
-              false -> args
-            end
-        ],
+        wrapper,
+        ["node", executable] ++
+          case watch do
+            true -> ["--watch" | args]
+            false -> args
+          end,
         env: %{"NODE_PATH" => Mix.Project.build_path()},
         cd: File.cwd!()
         # ^ project root dir of caller (dir containing mix.exs)
