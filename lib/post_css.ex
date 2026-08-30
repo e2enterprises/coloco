@@ -74,20 +74,7 @@ defmodule Coloco.PostCSS do
     input_css = "assets/css/app.css"
     output_css = "priv/static/assets/css/app.css"
 
-    args = ["--config", config, input_css, "--output", output_css]
-
-    # result =
-    #   System.shell(
-    #     (["node", executable] ++
-    #        case watch do
-    #          true -> ["--watch" | args]
-    #          false -> args
-    #        end)
-    #     |> Enum.join(" "),
-    #     env: %{"NODE_PATH" => Mix.Project.build_path()},
-    #     cd: File.cwd!()
-    #     # ^ project root dir of caller (dir containing mix.exs)
-    #   )
+    args = ["--verbose", "--config", config, input_css, "--output", output_css]
 
     {output, exit_code} =
       System.cmd(
@@ -106,10 +93,18 @@ defmodule Coloco.PostCSS do
 
     case exit_code do
       0 when is_binary(output) ->
-        IO.puts("[PostCSS] #{output}")
+        IO.puts("[PostCSS] Success ✔")
+
+        if output |> String.trim() |> String.length() do
+          IO.puts("[PostCSS] Output: #{output}")
+        end
 
       0 ->
-        IO.puts("[PostCSS] #{inspect(output)}")
+        IO.puts("[PostCSS] Success ✔")
+
+        if output != nil do
+          IO.puts("[PostCSS] Output: #{inspect(output)}")
+        end
 
       _ ->
         IO.puts("[PostCSS] Error: `node #{executable}` returned non-zero exit code #{exit_code}")
