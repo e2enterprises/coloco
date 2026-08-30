@@ -275,4 +275,6 @@ of these will behave identically and be formatted identically (any wrapping tags
 add will remain in place). Without these plugins, only the first example will work
 with the formatter; the second will cause it to error.
 
+## License
 
+MIT
