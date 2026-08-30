@@ -12,14 +12,36 @@ became the UI architecture pattern de jour. However, colocated CSS and JS in Liv
 1.2 has certain limitations, especially when using a template engine other than HEEx
 (eg. [Temple](https://github.com/mhanberg/temple)). LiveView also leaves much of the
 implementation of colocated CSS/JS to consumer side plugin code. Coloco fills in these
-gaps, providing ergonomic tooling out-of-the-box which:
-- works well with any template system -- not just HEEx -- because it leverages
-  straightforward classes and/or HTML attributes rather than framework-specific
-  mechanisms
-- allows colocated CSS/JS to be placed anywhere in module, not just within a template
-- does not rely on any PostCSS transform for CSS scoping
-- wrt. CSS scoping, includes support for legacy browsers, with opt-in `@scope`
-  strategy available to minimize CSS asset size when targeting only modern browsers
+gaps, providing ergonomic tooling out-of-the-box which integrates well with any
+template system.
+
+Coloco aims to provide an excellent dev experience in these areas:
+- **Ergonomics:** A set of macros allow flexible expression of JS and CSS code within
+  Phoenix component files, next to or within the template the code is relevant to.
+  This comes without any runtime cost.
+- **CSS Scoping:** Coloco provides a "low-fi" or "low-magic" form of CSS scoping using
+  generated `@scope` rules, with fallback strategy for browsers that don't support this.
+    - Note that "de-scoping" does not always happen automatically. Often you'll want
+      a CSS scope to end when a component's slot content starts, and in these cases
+      you'll need to use an element with a `descope_css` class or attr around the slot.
+    - Coloco does generate CSS to automatically "de-scope" wherever a new CSS scope
+      begins. So in cases where a CSS-scoped parent component has child sub-components
+      with their own scope, no manual de-scope is needed; the scopes will not overlap.
+- **CSS Post-Processing:** In most production settings, it's highly beneficial to do
+  some transformation of CSS between source code and what is shipped to the browser.
+  [Autoprefixer](https://github.com/postcss/autoprefixer) is ubiquitous for auto-adding
+  variations of rules for browser compatibility reasons. Another good example is CSS
+  nesting, which is not yet supported in older browsers. PostCSS provides plugin-based
+  handling of these transforms and many others from a rich ecosystem, but it has rough
+  edges when integrated with Phoenix. Coloco makes PostCSS configuration relatively
+  simple, and handles issues like the PostCSS watcher process not terminating during
+  Phoenix server shutdown when it's installed normally
+  ([see this issue](https://elixirforum.com/t/extra-watcher-doesnt-get-killed-when-shutting-down-phoenix/2807)).
+- **Colocated Code Formatting:** Setting up automatic formatting of colocated code
+  is possible in LiveView 1.2, which is amazing, but much of the actual implementation
+  is left to user-side plugin code making the setup cumbersome. Coloco provides
+  pre-built plugins which use Prettier to format colocated JS and CSS, with only a few
+  changes to `.formatter.exs` required.
 
 ## Installation
 
@@ -139,6 +161,65 @@ defmodule MyApplication.MyComponent do
   end
 end
 ```
+
+## PostCSS (Browser-compatible CSS nesting & auto-prefixing)
+
+Coloco expects the calling application to manage installation of PostCSS and its
+plugins, which gives much greater flexibility. First, run these commands in the
+`assets` directory:
+```sh
+cd assets
+! [[ -f package.json ]] && echo "{}" >> package.json
+npm install --save-dev postcss postcss-import postcss-nesting autoprefixer prettier tailwindcss @tailwindcss/cli @tailwindcss/postcss daisyui
+```
+Now you'll need to add a PostCSS config file in `assets`. Here's an example using the
+plugins installed above; copy this config into `assets/postcss.config.cjs`:
+```javascript
+const path = require("path")
+module.exports = {
+  plugins: [
+    require("postcss-import")({ path: process.env.NODE_PATH.split(path.delimiter) }),
+    // postcss-import should come first (per plugin docs)
+    require("@tailwindcss/postcss"),
+    require("postcss-nesting"),
+    require("autoprefixer"),
+  ]
+}
+```
+Now, make these changes to Phoenix app config to run PostCSS during build and also
+watch source files changes to rebuild when the dev server is running:
+```diff
+    # mix.exs
+
+    defp aliases do
+      [
+        setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+        "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+        "ecto.reset": ["ecto.drop", "ecto.setup"],
+        test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+        "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+---     "assets.build": ["compile", "tailwind example_app", "esbuild example_app"],
++++     "assets.build": ["compile", &Coloco.PostCSS.build/1, "esbuild example_app"],
+        "assets.deploy": [
+---       "tailwind example_app --minify",
+          "esbuild example_app --minify",
+          "phx.digest"
+        ],
+```
+```diff
+    # config/dev.exs
+
+    config :example_application, ExampleApplication.Endpoint
+      ...,
+      watchers: [
+        esbuild: {Esbuild, :install_and_run, [:example_app, ~w(--sourcemap=inline --watch)]},
+---     tailwind: {Tailwind, :install_and_run, [:example_app, ~w(--watch)]}
++++     postcss: {Coloco.PostCSS, :watcher, []}
+      ]
+```
+Note that PostCSS runs all Tailwind-related processing via the `@tailwind/postcss`
+plugin, so standalone commands to invoke tailwind are no longer necessary and are
+removed from the files above.
 
 ## Colocated Code Formatting
 
