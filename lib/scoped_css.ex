@@ -141,8 +141,12 @@ defmodule Coloco.ScopedCSS do
       |> String.replace(
         @unnested_non_atrule_selector_regex,
         "\\1:is(#{@rescope_selector_transform_pattern})" <>
-          ":not(#{descope_selector}:is(#{@rescope_selector_transform_pattern}))" <>
+          ":not(#{descope_selector})" <>
           ":not(#{descope_selector} :is(#{@rescope_selector_transform_pattern})) {"
+        # 1st :not(...) selector prevents CSS from being applied to children that
+        # would normally match but have descope selectors directly on them.
+        # 2nd :not(...) selector prevents CSS from being applied to children that would
+        # normally match but are descoped via parent/ancestor somewhere above them.
       )
 
     # Wrap all CSS within main scoping selector:
