@@ -1,0 +1,9 @@
+build: # build coloco
+  mix compile
+
+docs: build # build docs site
+  ex_doc Coloco 0.1.0 _build/dev/lib/coloco/ebin -m Coloco \
+    -u "https://github.com/e2enterprises/coloco"
+
+read: docs # open the docs site after building
+  open doc/index.html

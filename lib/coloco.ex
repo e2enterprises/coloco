@@ -1,4 +1,4 @@
-defmodule Coloco.Macros do
+defmodule Coloco do
   defmacro scope_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
     css = remove_surrounding_tags(css, "style", "CSS", "scope_css")
 

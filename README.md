@@ -60,7 +60,7 @@ end
 
 There are two ways Coloco can be used:
 1. Through four small macros: `scope_css`, `descope_css`, `colocate_js`, `colocate_hook`
-    - **Setup:** Add `import Coloco.Macros` to your module, or add it within
+    - **Setup:** Add `import Coloco` to your module, or add it within
       the `html_helpers` section of your Phoenix app config to make these macros
       available throughout all components (live and otherwise).
 2. Directly, by calling the `ScopeCSS` module directly.
