@@ -2,7 +2,7 @@ defmodule Coloco.MixProject do
   use Mix.Project
 
   @name "Coloco"
-  @version "0.1.0"
+  @version "0.1.1"
   @repository "https://github.com/e2enterprises/coloco"
 
   defp description() do
