@@ -7,11 +7,13 @@ defmodule Coloco do
   defmacro scope_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
     css = remove_surrounding_tags(css, "style", "CSS", "scope_css")
 
-    # Formatting of `expr` is aligned precisely to match whitespace
-    # when styles are defined normally within a HEEx sigil:
-    expr = "<style :type={Coloco.ScopedCSS}>  #{css}
-            </style>
-            "
+    expr =
+      """
+      <style :type={Coloco.ScopedCSS}>
+        #{css}
+      </style>
+      """
+      |> String.trim_leading()
 
     compile_heex(expr, meta, __CALLER__)
 
@@ -31,33 +33,64 @@ defmodule Coloco do
   defmacro colocate_js({:sigil_H, _, [{_, meta, [js]}, _]}) do
     js = remove_surrounding_tags(js, "script", "JS", "colocate_js")
 
-    # Formatting of `expr` is aligned precisely to match whitespace
-    # when scripts are defined normally within a HEEx sigil:
-    expr = "<script :type={Phoenix.LiveView.ColocatedJS}>  #{js}
-           </script>
-           "
+    expr =
+      """
+      <script :type={Phoenix.LiveView.ColocatedJS}>
+        #{js}
+      </script>
+      """
+      |> String.trim_leading()
 
     compile_heex(expr, meta, __CALLER__)
   end
 
   defmacro colocate_hook({:sigil_H, _, [{_, meta, [js]}, _]}) do
-    name = ".hook-#{hash("#{__CALLER__.module}-#{__CALLER__.line}")}"
-    module = __CALLER__.module |> to_string() |> String.replace_prefix("Elixir.", "")
-    name_prefixed_with_module = module <> name
-
+    {name, name_prefixed_with_module} = compute_hook_identifiers(__CALLER__)
     js = remove_surrounding_tags(js, "script", "JS", "colocate_hook")
 
-    # Formatting of `expr` is aligned precisely to match whitespace
-    # when scripts are defined normally within a HEEx sigil:
-    expr = "<script :type={Phoenix.LiveView.ColocatedHook} name=\"#{name}\">  #{js}
-           </script>
-           "
+    expr =
+      """
+      <script :type={Phoenix.LiveView.ColocatedHook} name=\"#{name}\">
+        #{js}
+      </script>
+      """
+      |> String.trim_leading()
 
     compile_heex(expr, meta, __CALLER__)
 
     quote do
       unquote(name_prefixed_with_module)
     end
+  end
+
+  defmacro colocate_mounted_hook({:sigil_H, _, [{_, meta, [js]}, _]}) do
+    {name, name_prefixed_with_module} = compute_hook_identifiers(__CALLER__)
+    js = remove_surrounding_tags(js, "script", "JS", "colocate_mounted_hook")
+
+    expr =
+      """
+      <script :type={Phoenix.LiveView.ColocatedHook} name=\"#{name}\">
+        export default {
+          mounted() {
+            #{js}
+          }
+        }
+      </script>
+      """
+      |> String.trim_leading()
+
+    compile_heex(expr, meta, __CALLER__)
+
+    quote do
+      unquote(name_prefixed_with_module)
+    end
+  end
+
+  defp compute_hook_identifiers(caller) do
+    name = ".hook-#{hash("#{caller.module}-#{caller.line}")}"
+    module = caller.module |> to_string() |> String.replace_prefix("Elixir.", "")
+    name_prefixed_with_module = module <> name
+    {name, name_prefixed_with_module}
   end
 
   defp remove_surrounding_tags(
