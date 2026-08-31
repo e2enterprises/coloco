@@ -1,4 +1,9 @@
 defmodule Coloco do
+  @moduledoc "README.md"
+             |> File.read!()
+             |> String.split("<!-- Coloco[@moduledoc] -->")
+             |> Enum.fetch!(1)
+
   defmacro scope_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
     css = remove_surrounding_tags(css, "style", "CSS", "scope_css")
 

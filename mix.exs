@@ -2,11 +2,11 @@ defmodule Coloco.MixProject do
   use Mix.Project
 
   @name "Coloco"
-  @version "0.1.0"
+  @version "0.1.1"
   @repository "https://github.com/e2enterprises/coloco"
 
   defp description() do
-    "Colocated, Scoped, Formatted, Ergonomic. Intermix JS, CSS & Phoenix LiveView components without limits."
+    "Colocated, Scoped, Formatted, Ergonomic. Intermix JS, CSS & Phoenix components without limits."
   end
 
   def project do
@@ -37,9 +37,8 @@ defmodule Coloco.MixProject do
 
   defp docs() do
     [
-      main: "readme",
-      logo: nil,
-      extras: ["README.md"]
+      # TODO
+      logo: nil
     ]
   end
 
@@ -49,7 +48,9 @@ defmodule Coloco.MixProject do
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.2.0"},
-      {:ex_doc, "~> 0.34", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:makeup_js, "~> 0.1.0"},
+      {:makeup_diff, "~> 0.1.0"}
     ]
   end
 

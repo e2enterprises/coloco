@@ -1,5 +1,5 @@
 build: # build coloco
-  mix compile
+  mix compile --force
 
 docs: build # build docs site
   ex_doc Coloco 0.1.0 _build/dev/lib/coloco/ebin -m Coloco \

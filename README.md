@@ -1,7 +1,29 @@
 # Coloco
 
-**Colocated, Scoped, Formatted, Ergonomic. Intermix JS, CSS & Phoenix LiveView
-components without limits.**
+<!-- START --><!-- Coloco[@moduledoc] -->
+
+**Colocated, Scoped, Formatted, Ergonomic. Intermix JS, CSS & Phoenix components
+without limits.**
+
+🚧 Currently experimental, under active development. APIs subject to change, feedback
+welcome. Try it out and contribute if you're interested! 🚧
+
+```elixir
+div class:
+  scope_css(~H"""
+    color: red;
+    p { color: green; }
+  """css)
+do
+  p id: "hook-ids", "phx-hook":
+    colocate_hook_on_mount(~H"""
+      alert('Ahoy, a hook');
+    """js
+  do
+    "hello world"
+  end
+end
+```
 
 ## Why?
 
@@ -51,7 +73,7 @@ Add `coloco` to your list of dependencies in `mix.exs`, then run `mix deps.get`:
 ```elixir
 def deps do
   [
-    {:coloco, "~> 0.1.0"}
+    {:coloco, "~> 0.1.1"}
   ]
 end
 ```
@@ -275,6 +297,8 @@ With `PreHTMLFormatterPlugin` and `PostHTMLFormatterPlugin` included in plugins,
 of these will behave identically and be formatted identically (any wrapping tags you
 add will remain in place). Without these plugins, only the first example will work
 with the formatter; the second will cause it to error.
+
+<!-- Coloco[@moduledoc] --><!-- END -->
 
 ## License
 
