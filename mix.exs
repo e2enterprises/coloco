@@ -2,7 +2,7 @@ defmodule Coloco.MixProject do
   use Mix.Project
 
   @name "Coloco"
-  @version "0.1.1"
+  @version "0.1.0"
   @repository "https://github.com/e2enterprises/coloco"
 
   defp description() do
@@ -37,8 +37,11 @@ defmodule Coloco.MixProject do
 
   defp docs() do
     [
+      main: Coloco,
       # TODO
-      logo: nil
+      # logo: nil
+      before_closing_head_tag: &before_closing_head_tag/1,
+      before_closing_body_tag: &before_closing_body_tag/1
     ]
   end
 
@@ -49,12 +52,40 @@ defmodule Coloco.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.2.0"},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-      {:makeup_js, "~> 0.1.0"},
-      {:makeup_diff, "~> 0.1.0"}
+      {:makeup_js, "~> 0.1.0", only: :dev, runtime: false},
+      {:makeup_diff, "~> 0.1.0", only: :dev, runtime: false}
     ]
   end
 
   def application do
     []
+  end
+
+  defp before_closing_head_tag(:epub), do: nil
+
+  defp before_closing_head_tag(:html) do
+    # Because we have no "extras" in the Pages section, hide this tab for clarity:
+    """
+    <style>
+      #extras-list-tab-button { display: none; }
+    </style>
+    """
+  end
+
+  defp before_closing_body_tag(:epub), do: nil
+
+  defp before_closing_body_tag(:html) do
+    # Automatically expand the "Sections" list in the sidebar for visibility:
+    """
+    <script>
+      addEventListener("DOMContentLoaded", function () {
+        requestAnimationFrame(function () { // wait for full sidebar render
+          var btn = document.querySelector('button[aria-controls="Coloco-sections-list"]')
+          console.log(btn);
+          btn.click();
+        });
+      });
+    </script>
+    """
   end
 end

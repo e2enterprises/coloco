@@ -2,27 +2,29 @@
 
 <!-- START --><!-- Coloco[@moduledoc] -->
 
-**Colocated, Scoped, Formatted, Ergonomic. Intermix JS, CSS & Phoenix components
-without limits.**
-
 🚧 Currently experimental, under active development. APIs subject to change, feedback
-welcome. Try it out and contribute if you're interested! 🚧
+welcome. 🚧
 
 ```elixir
-div class:
-  scope_css(~H"""
-    color: red;
-    p { color: green; }
-  """css)
-do
-  p id: "hook-ids", "phx-hook":
-    colocate_hook_on_mount(~H"""
-      alert('Ahoy, a hook');
-    """js
-  do
-    "hello world"
+# Finally, unifying HTML, CSS, JS in one cozy DSL via Temple, LiveView, and Coloco:
+
+temple do
+  div class:
+        scope_css(~H"""
+          color: red;
+          p { color: green; }
+        """css) do
+    p id: "hook-id",
+      "phx-hook":
+        colocate_mounted_hook(~H"""
+          alert('Ahoy, a hook');
+        """js) do
+      "hello world"
+    end
   end
 end
+
+# Note: Most in-editor syntax highlighters that support HEEx will properly color CSS & JS.
 ```
 
 ## Why?
@@ -73,16 +75,16 @@ Add `coloco` to your list of dependencies in `mix.exs`, then run `mix deps.get`:
 ```elixir
 def deps do
   [
-    {:coloco, "~> 0.1.1"}
+    {:coloco, "~> 0.1.0"}
   ]
 end
 ```
 
-## Setup
+## Usage
 
 There are two ways Coloco can be used:
-1. Through four small macros: `scope_css`, `descope_css`, `colocate_js`, `colocate_hook`
-    - **Setup:** Add `import Coloco` to your module, or add it within
+1. Through a set of small macros: `scope_css`, `descope_css`, `colocate_js`, `colocate_hook`, `colocate_hook_on_mount`
+    - **Setup:** Add `import Coloco` to your module, or add it to
       the `html_helpers` section of your Phoenix app config to make these macros
       available throughout all components (live and otherwise).
 2. Directly, by calling the `ScopeCSS` module directly.
@@ -185,10 +187,10 @@ defmodule MyApplication.MyComponent do
 end
 ```
 
-## PostCSS (Browser-compatible CSS nesting & auto-prefixing)
+## CSS Nesting + Autoprefixer
 
-Coloco expects the calling application to manage installation of PostCSS and its
-plugins, which gives much greater flexibility. First, run these commands in the
+Coloco expects the calling application to manage installation of
+[PostCSS](https://postcss.org/) and its plugins, which gives much greater flexibility. First, run these commands in the
 `assets` directory:
 ```sh
 cd assets
