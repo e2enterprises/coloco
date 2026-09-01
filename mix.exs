@@ -75,15 +75,35 @@ defmodule Coloco.MixProject do
   defp before_closing_body_tag(:epub), do: nil
 
   defp before_closing_body_tag(:html) do
-    # Automatically expand the "Sections" list in the sidebar for visibility:
+    # Automatically expand the "Sections" list in the sidebar for visibility.
+    # Expand during page load, and also any time the sidebar is opened (for mobile).
     """
     <script>
+      function expandSections() {
+        const selector = 'button[aria-controls="Coloco-sections-list"]';
+        const sectionsToggle = document.querySelector(selector);
+        if (sectionsToggle && sectionsToggle.getAttribute("aria-expanded") !== "true") {
+          sectionsToggle.click();
+        }
+      }
+      function expandSectionsWhenSidebarOpens() {
+        const sidebarToggle = document.querySelector('button#sidebar-menu');
+        if (sidebarToggle && window.MutationObserver !== undefined) {
+          new MutationObserver(function (mutationList) {
+            for (const mutation of mutationList) {
+              if (mutation.type === "attributes"
+                && mutation.attributeName === "aria-expanded"
+                && mutation.target.getAttribute("aria-epanded") === "true"
+              ) {
+                expandSections();
+              }
+            }
+          }).observe(sidebarToggle, { attributes: true });
+        }
+      }
       addEventListener("DOMContentLoaded", function () {
-        requestAnimationFrame(function () { // wait for full sidebar render
-          var btn = document.querySelector('button[aria-controls="Coloco-sections-list"]')
-          console.log(btn);
-          btn.click();
-        });
+        requestAnimationFrame(expandSections); // wait for full sidebar render
+        requestAnimationFrame(expandSectionsWhenSidebarOpens);
       });
     </script>
     """
