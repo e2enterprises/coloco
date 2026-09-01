@@ -85,13 +85,19 @@ end
 ## Usage
 
 There are two ways Coloco can be used:
-1. Through a set of small macros: `scope_css`, `descope_css`, `colocate_js`, `colocate_hook`, `colocate_hook_on_mount`
+1. Through a set of small macros: `scope_css`, `descope_css`, `global_css`,
+   `colocate_js`, `colocate_hook`, `colocate_mounted_hook`
     - **Setup:** Add `import Coloco` to your module, or add it to
       the `html_helpers` section of your Phoenix app config to make these macros
       available throughout all components (live and otherwise).
-2. Directly, by calling the `ScopeCSS` module directly.
-    - **Setup:** None; just call `Coloco.ScopedCSS.scope` and other functions wherever
-      you need them.
+2. Directly, by calling the `ScopeCSS`, `GlobalCSS`, `Phoenix.LiveView.ColocatedJS`,
+   and `Phoenix.LiveView.ColocatedHook` modules directly.
+    - **Setup:** None; just call `Coloco.ScopedCSS.scope` directly, and pass the
+      modules above as\
+      `:type={<MODULE>}` within HEEx `<style>` and `<script>` tags
+      whenever you want to declare colocated CSS or JS. This does exactly what the
+      hooks above would do for you; just in more direct, less convenient fashion.
+      Examples below.
 
 These two methods are functionally equivalent; macros operate during compilation
 so runtime behavior will be identical. Here are kitchen-sink examples of each style

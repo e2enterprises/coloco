@@ -4,6 +4,24 @@ defmodule Coloco do
              |> String.split("<!-- Coloco[@moduledoc] -->")
              |> Enum.fetch!(1)
 
+  defmacro global_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
+    css = remove_surrounding_tags(css, "style", "CSS", "global_css")
+
+    expr =
+      """
+      <style :type={Coloco.GlobalCSS}>
+        #{css}
+      </style>
+      """
+      |> String.trim_leading()
+
+    compile_heex(expr, meta, __CALLER__)
+
+    quote do
+      ""
+    end
+  end
+
   defmacro scope_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
     css = remove_surrounding_tags(css, "style", "CSS", "scope_css")
 
