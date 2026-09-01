@@ -6,25 +6,27 @@
 welcome. 🚧
 
 ```elixir
-# Finally, unifying HTML, CSS, JS in one cozy DSL via Temple, LiveView, and Coloco:
-
+# Finally, unifying HTML + CSS + JS in one cozy DSL
+#                  via Temple, LiveView, and Coloco
 temple do
   div class:
         scope_css(~H"""
           color: red;
-          p { color: green; }
-        """css) do
-    p id: "hook-id",
+          p {
+            color: green;
+            b { color: blue; }
+          }
+        """css) do    # ↖ Browser-agnostic CSS nesting provided by PostCSS.
+    p id: "hook-id",  #   Autoprefixer too, don't leave home without it.
       "phx-hook":
         colocate_mounted_hook(~H"""
           alert('Ahoy, a hook');
-        """js) do
-      "hello world"
+        """js) do     # ↖ Colocated JS & CSS auto-formatted with Prettier.
+      "hello"         # ↖ Most in-editor syntax highlighters that support
+      b do: "world"   #   HEEx will properly color CSS & JS.
     end
   end
 end
-
-# Note: Most in-editor syntax highlighters that support HEEx will properly color CSS & JS.
 ```
 
 ## Why?
@@ -126,12 +128,8 @@ defmodule MyApplication.MyComponent do
   end
 
   def p_hook() do
-    colocate_hook(~H"""
-      export default {
-        mounted() {
-          alert("hello world from colocated hook");
-        },
-      };
+    colocate_mounted_hook(~H"""
+      alert("hello world from colocated hook");
     """js)
   end
 end
