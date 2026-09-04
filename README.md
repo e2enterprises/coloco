@@ -77,7 +77,7 @@ Add `coloco` to your list of dependencies in `mix.exs`, then run `mix deps.get`:
 ```elixir
 def deps do
   [
-    {:coloco, "~> 0.1.1"}
+    {:coloco, "~> 0.1.2"}
   ]
 end
 ```
