@@ -1,6 +1,6 @@
 # Coloco
 
-<!-- START --><!-- Coloco[@moduledoc] -->
+<!-- @moduledoc Coloco -->
 
 🚧 Currently experimental, under active development. APIs subject to change, feedback
 welcome. 🚧
@@ -304,7 +304,7 @@ of these will behave identically and be formatted identically (any wrapping tags
 add will remain in place). Without these plugins, only the first example will work
 with the formatter; the second will cause it to error.
 
-<!-- Coloco[@moduledoc] --><!-- END -->
+<!-- /@moduledoc Coloco -->
 
 ## License
 

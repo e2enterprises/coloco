@@ -1,8 +1,20 @@
-build: # build coloco
-  mix compile --force
+install: # install all dependencies
+	mix deps.get
+
+build: install # build coloco
+	mix compile --force
+
+clean: # remove dependencies and build files
+	rm -rf _build deps priv
+
+push: # push to all git remotes
+	git push all HEAD
 
 docs: build # build docs site
-  mix docs
+	mix docs
 
 read: docs # open the docs site after building
-  open doc/index.html
+	open doc/index.html
+
+test: build # run all coloco tests
+	mix test $(@)

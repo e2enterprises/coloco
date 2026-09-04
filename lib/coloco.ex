@@ -1,8 +1,8 @@
 defmodule Coloco do
-  @moduledoc "README.md"
-             |> File.read!()
-             |> String.split("<!-- Coloco[@moduledoc] -->")
-             |> Enum.fetch!(1)
+  # import DryDoc
+
+  # @moduledoc doc_from_readme()
+  @moduledoc Coloco |> DryDoc.from_readme()
 
   defmacro global_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
     css = remove_surrounding_tags(css, "style", "CSS", "global_css")
@@ -21,6 +21,8 @@ defmodule Coloco do
       ""
     end
   end
+
+  @doc Coloco |> DryDoc.from_file("README.md", :scope_css)
 
   defmacro scope_css({:sigil_H, _, [{_, meta, [css]}, _]}) do
     css = remove_surrounding_tags(css, "style", "CSS", "scope_css")
